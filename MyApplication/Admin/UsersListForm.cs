@@ -1,82 +1,142 @@
 ﻿using System.Linq;
-using System.Data.Entity;
 
 namespace MyApplication.Admin
 {
-	public partial class UsersListForm : Infrastructure.BaseForm
-	{
-		public UsersListForm()
-		{
-			InitializeComponent();
-		}
+    public partial class UsersListForm : Infrastructure.BaseForm
+    {
+        public UsersListForm()
+        {
+            InitializeComponent();
+        }
 
-		private Models.DatabaseContext _myDatabaseContext;
+        //private Models.DatabaseContext _myDatabaseContext;
 
-		private void UsersListForm_Load(object sender, System.EventArgs e)
-		{
-			_myDatabaseContext =
-				new Models.DatabaseContext();
-		}
+        private void UsersListForm_Load(object sender, System.EventArgs e)
+        {
+            //_myDatabaseContext =
+            //	new Models.DatabaseContext();
+        }
 
-		private void UsersListForm_FormClosed
-			(object sender, System.Windows.Forms.FormClosedEventArgs e)
-		{
-			if (_myDatabaseContext != null)
-			{
-				_myDatabaseContext.Dispose();
-				_myDatabaseContext = null;
-			}
-		}
+        private void UsersListForm_FormClosed
+            (object sender, System.Windows.Forms.FormClosedEventArgs e)
+        {
+            //if (_myDatabaseContext != null)
+            //{
+            //	_myDatabaseContext.Dispose();
+            //	_myDatabaseContext = null;
+            //}
+        }
 
-		private void searchButton_Click(object sender, System.EventArgs e)
-		{
-			System.Collections.Generic.List<Models.User> oUsers = null;
+        private void searchButton_Click(object sender, System.EventArgs e)
+        {
+            Models.DatabaseContext oDatabaseContext = null;
 
-			fullNameTextBox.Text =
-				fullNameTextBox.Text.Trim();
+            try
+            {
+                oDatabaseContext =
+                    new Models.DatabaseContext();
 
-			if (fullNameTextBox.Text == string.Empty)
-			{
-				oUsers =
-					_myDatabaseContext.Users
-					.OrderBy(current => current.FullName)
-					.ToList()
-					;
-			}
-			else
-			{
-				oUsers =
-					_myDatabaseContext.Users
-					.Where(current => current.FullName.Contains(fullNameTextBox.Text))
-					.OrderBy(current => current.FullName)
-					.ToList()
-					;
-			}
+                System.Collections.Generic.List<Models.User> oUsers = null;
 
-			// Binding
-			usersListBox.ValueMember = "Id";
-			usersListBox.DisplayMember = "FullName";
-			usersListBox.DataSource = oUsers;
+                // **************************************************
+                fullNameTextBox.Text =
+                    fullNameTextBox.Text.Trim();
 
-			if (oUsers.Count == 0)
-			{
-				System.Windows.Forms.MessageBox.Show("No Users!");
-			}
-		}
+                // تا وقتی که در داخل متن، دو فاصله وجود دارد
+                // دو فاصله را به یک فاصله تبدیل کن
+                while (fullNameTextBox.Text.Contains("  "))
+                {
+                    fullNameTextBox.Text =
+                        fullNameTextBox.Text.Replace("  ", " ");
+                }
+                // **************************************************
 
-		private void usersListBox_DoubleClick(object sender, System.EventArgs e)
-		{
-			Models.User oSelectedUser =
-				usersListBox.SelectedItem as Models.User;
+                if (fullNameTextBox.Text == string.Empty)
+                {
+                    oUsers =
+                        oDatabaseContext.Users
+                        .OrderBy(current => current.FullName)
+                        .ToList()
+                        ;
+                }
+                else
+                {
+                    //oUsers =
+                    //	oDatabaseContext.Users
+                    //	.Where(current => current.FullName == fullNameTextBox.Text)
+                    //	.OrderBy(current => current.FullName)
+                    //	.ToList()
+                    //	;
 
-			if (oSelectedUser != null)
-			{
-				UpdateUserForm updateUserForm = new UpdateUserForm();
+                    //oUsers =
+                    //	oDatabaseContext.Users
+                    //	.Where(current => string.Compare(current.FullName, fullNameTextBox.Text, true) == 0)
+                    //	.OrderBy(current => current.FullName)
+                    //	.ToList()
+                    //	;
 
-				updateUserForm.UserId = oSelectedUser.Id;
+                    //oUsers =
+                    //	oDatabaseContext.Users
+                    //	.Where(current => current.FullName.StartsWith(fullNameTextBox.Text))
+                    //	.OrderBy(current => current.FullName)
+                    //	.ToList()
+                    //	;
 
-				updateUserForm.ShowDialog();
-			}
-		}
-	}
+                    //oUsers =
+                    //	oDatabaseContext.Users
+                    //	.Where(current => current.FullName.EndsWith(fullNameTextBox.Text))
+                    //	.OrderBy(current => current.FullName)
+                    //	.ToList()
+                    //	;
+
+                    oUsers =
+                        oDatabaseContext.Users
+                        .Where(current => current.FullName.Contains(fullNameTextBox.Text))
+                        .OrderBy(current => current.FullName)
+                        .ToList()
+                        ;
+                }
+
+                // Binding
+                //usersListBox.DataSource = null;
+                usersListBox.ValueMember = "Id";
+                //usersListBox.DisplayMember = "FullName";
+                usersListBox.DisplayMember = "DisplayName";
+                usersListBox.DataSource = oUsers;
+
+                if (oUsers.Count == 0)
+                {
+                    System.Windows.Forms.MessageBox.Show("There is not any user with this full name!");
+                }
+            }
+            catch (System.Exception ex)
+            {
+                System.Windows.Forms.MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                if (oDatabaseContext != null)
+                {
+                    oDatabaseContext.Dispose();
+                    oDatabaseContext = null;
+                }
+            }
+        }
+
+        private void usersListBox_DoubleClick(object sender, System.EventArgs e)
+        {
+            Models.User oSelectedUser =
+                usersListBox.SelectedItem as Models.User;
+
+            if (oSelectedUser != null)
+            {
+                UpdateUserForm updateUserForm = new UpdateUserForm();
+
+                updateUserForm.User = oSelectedUser;
+                //updateUserForm.UserId = oSelectedUser.Id;
+
+                updateUserForm.ShowDialog();
+            }
+        }
+    }
 }

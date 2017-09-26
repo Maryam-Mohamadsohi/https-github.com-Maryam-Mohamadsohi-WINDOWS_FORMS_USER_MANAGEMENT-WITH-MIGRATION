@@ -1,1 +1,20 @@
-﻿
+﻿One)Befor the first release 
+Make "DatabaseContextInitializerBeforeTheFirstRelease.cs" class in Models project.
+change "DatabaseContextInitializer.cs" and "DatabaseContext.cs" classes.
+(Note: In static constructor of "DatabaseContext.cs" class use the first scenario.)
+Two)For the first release
+Add required nuget as following:
+Tools->NuGet Package Manager->Package Manager Console
+In "Package Manager Console" window type "Enable-Migrations".(Note:Set Models as default project.)
+The folder "Migration" with 2 classes "..._InitialCreate.cs" and "Configuration.cs" will create.
+Replace "Configuration.cs" of this project with "Configuration.cs" last created.
+(Note:Change condition of "if" proper with your database.)
+Now in static constructor of "DatabaseContext.cs" class use the second scenario.
+Three)After making some changes in database(new version)
+Make required changes
+Rebuild solution
+Add required nuget as following:
+Tools->NuGet Package Manager->Package Manager Console
+In "Package Manager Console" window type "Add-Migration -name Version001".
+(Note:Set Models as default project.)
+..._Version001.cs will create in Migrations.
